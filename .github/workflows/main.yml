@@ -1,0 +1,53 @@
+name: Build Expo Android APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Expo CLI
+        run: npm install -g expo-cli
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Login to Expo (anonymous)
+        run: npx expo login -u anonymous -p anonymous || echo "Skipping login"
+
+      - name: Prebuild native project
+        run: npx expo prebuild --platform android --non-interactive
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Clean Android build
+        run: cd android && ./gradlew clean
+
+      - name: Build debug APK
+        run: cd android && ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
