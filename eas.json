@@ -1,0 +1,7 @@
+echo '{
+  "cli": { "version": ">= 5.0.0" },
+  "build": {
+    "preview": {},
+    "production": {}
+  }
+}' > eas.json
